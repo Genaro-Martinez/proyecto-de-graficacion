@@ -186,6 +186,7 @@ function leerArchivoGenerico(e: any, isBase: boolean) {
              tempObj.rhoMax = 1000 * tempObj.rhoMin;
              tempObj.rho = 3.5 * tempObj.rhoMin;
              tempObj.baseColorR = 30; tempObj.baseColorG = 30; tempObj.baseColorB = 30;
+             tempObj.targetX = 1.0;
              
              const lbl = document.getElementById('file-name-base');
              if (lbl) lbl.innerText = "> " + archivo.name;
@@ -197,6 +198,7 @@ function leerArchivoGenerico(e: any, isBase: boolean) {
              tempObj.rhoMax = 1000 * tempObj.rhoMin;
              tempObj.rho = 3.5 * tempObj.rhoMin;
              tempObj.baseColorR = 213; tempObj.baseColorG = 0; tempObj.baseColorB = 0;
+             tempObj.targetX = 1.0;
              
              const lbl = document.getElementById('file-name-movil');
              if (lbl) lbl.innerText = "> " + archivo.name;
@@ -250,6 +252,9 @@ window.addEventListener('load', () => {
      obj.rhoMax = 1000 * obj.rhoMin;
      obj.rho = 2.5 * obj.rhoMin; 
      obj.sunX = 0.5;
+     
+     // Centrar la figura desplazándola hacia arriba (la mitad de su altura en X que es 2.0)
+     obj.targetX = 1.0;
      
      // Forzar la matriz absoluta: Vista frontal perfecta
      obj.theta = 0;
