@@ -1,7 +1,7 @@
 import { Obj3D } from './Obj3D.js';
 import { CvZbuf } from './CvZbuf.js';
 import { Point3D } from './point3D.js';
-import { chainLink0, chainLink1, chainLink2, chainLink3, chainLink4 } from './defaultModels.js';
+import { clockBase, clockHour, clockMinute, clockSecond } from './clockModels.js';
 
 let canvas: HTMLCanvasElement;
 let graphics: CanvasRenderingContext2D;
@@ -13,20 +13,13 @@ let cv: CvZbuf;
 let loadedObjects: Obj3D[] = [];
 let backups: (Point3D | null)[][] = [];
 
-// Kinematics states
-let coilingProgress = 0;
-let coilingTarget = 0;
-let isCoiling = false;
-
-// Assembly state
-let visibleLinksCount = 5;
 let baseRho = 1.0;
 
 function repaintAll() {
   if (!cv) cv = new CvZbuf(graphics, canvas);
   cv = new CvZbuf(graphics, canvas);
   
-  for (let i = 0; i < visibleLinksCount && i < loadedObjects.length; i++) {
+  for (let i = 0; i < loadedObjects.length; i++) {
     cv.addObj(loadedObjects[i]);
   }
   cv.paint();
@@ -48,51 +41,32 @@ function toggleAutoRotate() {
   
   if (btn) {
     if (autoRotating) {
-      btn.innerHTML = '■ DETENER';
+      btn.innerHTML = '[ DETENER MATRIZ ]';
       rotateLoop();
     } else {
-      btn.innerHTML = '► ANIMAR';
+      btn.innerHTML = '[ ANIMAR MATRIZ ]';
       cancelAnimationFrame(animationFrameId);
     }
   }
 }
 
-function updateKinematics() {
-  if (coilingProgress !== coilingTarget) {
-     coilingProgress += (coilingTarget - coilingProgress) * 0.1;
-     if (Math.abs(coilingTarget - coilingProgress) < 0.01) {
-        coilingProgress = coilingTarget;
-     }
-     
-     let angle = coilingProgress * (Math.PI / 2.2); 
+function updateClock() {
+  if (loadedObjects.length < 4) return;
+  
+  const now = new Date();
+  const ms = now.getMilliseconds();
+  const sec = now.getSeconds() + ms / 1000;
+  const min = now.getMinutes() + sec / 60;
+  const hour = now.getHours() % 12 + min / 60;
 
-     for (let i = 0; i < loadedObjects.length; i++) {
-        for (let v = 1; v < loadedObjects[i].w.length; v++) {
-           let pBase = backups[i][v];
-           if (!pBase) continue;
-           let px = pBase.x;
-           let py = pBase.y;
-           let pz = pBase.z;
-
-           for (let j = i - 1; j >= 0; j--) {
-              let jx = -2.24 + j * 1.35; 
-              let jy = 0;
-              
-              let tx = px - jx;
-              let ty = py - jy;
-              let rx = tx * Math.cos(angle) - ty * Math.sin(angle);
-              let ry = tx * Math.sin(angle) + ty * Math.cos(angle);
-              px = rx + jx;
-              py = ry + jy;
-           }
-           
-           loadedObjects[i].w[v].x = px;
-           loadedObjects[i].w[v].y = py;
-           loadedObjects[i].w[v].z = pz;
-        }
-     }
-     vp(0,0,1);
-  }
+  // Obj 1: Hour, Obj 2: Min, Obj 3: Sec
+  // We negate the angle because Math.cos/sin in localRotZ might rotate counter-clockwise by default
+  loadedObjects[1].localRotZ = -hour * (Math.PI * 2 / 12);
+  loadedObjects[2].localRotZ = -min * (Math.PI * 2 / 60);
+  loadedObjects[3].localRotZ = -sec * (Math.PI * 2 / 60);
+  
+  // Re-project with updated localRotZ
+  vp(0,0,1);
 }
 
 function rotateLoop() {
@@ -101,19 +75,11 @@ function rotateLoop() {
     vp(dTheta, 0, 1);
   }
   
-  updateKinematics();
+  updateClock();
   animationFrameId = requestAnimationFrame(rotateLoop);
 }
 
 document.getElementById('btn-auto-rotate')?.addEventListener('click', toggleAutoRotate, false);
-
-canvas.addEventListener('click', () => {
-    coilingTarget = coilingTarget === 0 ? 1 : 0;
-    if (!autoRotating) {
-        if (animationFrameId) cancelAnimationFrame(animationFrameId);
-        rotateLoop();
-    }
-});
 
 let Pix: number, Piy: number;
 let Pfx: number, Pfy: number;
@@ -209,16 +175,56 @@ canvas.addEventListener('wheel', (e) => {
   }
 });
 
+function leerArchivoGenerico(e: any, isBase: boolean) {
+    let archivo = e.target.files[0];
+    if (!archivo) return;
+    let lector = new FileReader();
+    lector.onload = function(e: any) {
+      let contenido = e.target.result;
+      
+      let tempObj = new Obj3D();
+      if (tempObj.read(contenido)) {
+         if (isBase) {
+             loadedObjects = [tempObj];
+             
+             let sx = tempObj.xMax - tempObj.xMin;
+             let sy = tempObj.yMax - tempObj.yMin;
+             let sz = tempObj.zMax - tempObj.zMin;
+             baseRho = 0.6 * Math.sqrt(sx*sx + sy*sy + sz*sz);
+             tempObj.rhoMin = baseRho;
+             tempObj.rhoMax = 1000 * tempObj.rhoMin;
+             tempObj.rho = 3.5 * tempObj.rhoMin;
+             
+             const lbl = document.getElementById('file-name-base');
+             if (lbl) lbl.innerText = "> " + archivo.name;
+         } else {
+             // Append
+             let i = loadedObjects.length;
+             loadedObjects.push(tempObj);
+             tempObj.rhoMin = baseRho;
+             tempObj.rhoMax = 1000 * tempObj.rhoMin;
+             tempObj.rho = 3.5 * tempObj.rhoMin;
+             
+             const lbl = document.getElementById('file-name-movil');
+             if (lbl) lbl.innerText = "> " + archivo.name;
+         }
+         
+         vp(0,0,1);
+         repaintAll();
+      }
+    };
+    lector.readAsText(archivo);
+}
+
 window.addEventListener('load', () => {
   cv = new CvZbuf(graphics, canvas);
   
-  const parts = [chainLink0, chainLink1, chainLink2, chainLink3, chainLink4];
+  const parts = [clockBase, clockHour, clockMinute, clockSecond];
   const colors = [
-    {r: 255, g: 0, b: 0},
-    {r: 0, g: 255, b: 0},
-    {r: 0, g: 150, b: 255},
-    {r: 255, g: 255, b: 0},
-    {r: 255, g: 0, b: 255}
+    {r: 255, g: 228, b: 243}, // Base: Soft pastel pink
+    {r: 255, g: 133, b: 192}, // Hour: Vibrant pink
+    {r: 240, g: 98, b: 146},  // Minute: Dark pink
+    {r: 154, g: 123, b: 155}  // Second: Muted purple
   ];
 
   let minX = 9999, maxX = -9999;
@@ -253,23 +259,16 @@ window.addEventListener('load', () => {
 
   for (let i=0; i<loadedObjects.length; i++) {
      let obj = loadedObjects[i];
-     backups[i] = [];
-     for (let v=1; v<obj.w.length; v++) {
-        if (obj.w[v]) {
-            obj.w[v].x -= dx;
-            obj.w[v].y -= dy;
-            obj.w[v].z -= dz;
-            backups[i][v] = new Point3D(obj.w[v].x, obj.w[v].y, obj.w[v].z);
-        }
-     }
-     
+     // Do not shift to global origin so they keep their local coordinate centers (pivots)
      obj.rhoMin = baseRho;
      obj.rhoMax = 1000 * obj.rhoMin;
-     obj.rho = 3.5 * obj.rhoMin; 
+     obj.rho = 1.0 * obj.rhoMin; 
   }
   
   vp(0,0,1);
   repaintAll();
+  
+  // Set up loop for clock and possible auto-rotation
   rotateLoop();
   
   // Panel Listeners
@@ -300,7 +299,6 @@ window.addEventListener('load', () => {
     repaintAll();
   });
 
-  // Zoom Listener
   const camZoom = document.getElementById('cam-zoom') as HTMLInputElement;
   const valCamZoom = document.getElementById('val-cam-zoom');
   camZoom?.addEventListener('input', (e) => {
@@ -310,76 +308,6 @@ window.addEventListener('load', () => {
     vp(0,0,1);
     repaintAll();
   });
-
-  // Assemble Button Listener
-  const btnAssemble = document.getElementById('btn-assemble');
-  btnAssemble?.addEventListener('click', () => {
-      visibleLinksCount = 1;
-      repaintAll();
-      let assemblyInterval = setInterval(() => {
-          visibleLinksCount++;
-          repaintAll();
-          if (visibleLinksCount >= 5) {
-              clearInterval(assemblyInterval);
-          }
-      }, 600); // add a new link every 600ms
-  });
-
-
-  // File loaders
-  function leerArchivoGenerico(e: any, isBase: boolean) {
-    let archivo = e.target.files[0];
-    if (!archivo) return;
-    let lector = new FileReader();
-    lector.onload = function(e: any) {
-      let contenido = e.target.result;
-      
-      let tempObj = new Obj3D();
-      if (tempObj.read(contenido)) {
-         if (isBase) {
-             loadedObjects = [tempObj];
-             backups = [];
-             
-             // Setup backup for the single object
-             backups[0] = [];
-             for(let v=1; v<tempObj.w.length; v++) {
-                 if (tempObj.w[v]) backups[0][v] = new Point3D(tempObj.w[v].x, tempObj.w[v].y, tempObj.w[v].z);
-             }
-             
-             let sx = tempObj.xMax - tempObj.xMin;
-             let sy = tempObj.yMax - tempObj.yMin;
-             let sz = tempObj.zMax - tempObj.zMin;
-             baseRho = 0.6 * Math.sqrt(sx*sx + sy*sy + sz*sz);
-             tempObj.rhoMin = baseRho;
-             tempObj.rhoMax = 1000 * tempObj.rhoMin;
-             tempObj.rho = 3.5 * tempObj.rhoMin;
-             visibleLinksCount = 1;
-             
-             const lbl = document.getElementById('file-name-base');
-             if (lbl) lbl.innerText = archivo.name;
-         } else {
-             // Append to assembly
-             let i = loadedObjects.length;
-             loadedObjects.push(tempObj);
-             backups[i] = [];
-             for(let v=1; v<tempObj.w.length; v++) {
-                 if (tempObj.w[v]) backups[i][v] = new Point3D(tempObj.w[v].x, tempObj.w[v].y, tempObj.w[v].z);
-             }
-             tempObj.rhoMin = baseRho;
-             tempObj.rhoMax = 1000 * tempObj.rhoMin;
-             tempObj.rho = 3.5 * tempObj.rhoMin;
-             visibleLinksCount = loadedObjects.length;
-             
-             const lbl = document.getElementById('file-name-movil');
-             if (lbl) lbl.innerText = archivo.name;
-         }
-         
-         vp(0,0,1);
-         repaintAll();
-      }
-    };
-    lector.readAsText(archivo);
-  }
 
   const fileBase = document.getElementById('file-input-base');
   fileBase?.addEventListener('change', (e) => leerArchivoGenerico(e, true), false);

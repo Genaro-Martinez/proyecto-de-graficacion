@@ -2,59 +2,59 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Motor 3D - Terminal</title>
+  <title>Motor 3D - Reloj Pastel</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <style>
-    /* VARIABLES ESTILO TERMINAL */
+    /* VARIABLES ESTILO PASTEL (FEMBOY AESTHETIC) */
     :root {
-      --bg-color: #050505;
-      --panel-bg: #0a0a0a;
-      --primary: #00ff00;
-      --primary-dark: #005500;
-      --text-main: #00ff00;
-      --text-muted: #00aa00;
-      --border-color: #00ff00;
-      --canvas-bg: #000000;
+      --bg-color: #fdf6fb;
+      --panel-bg: #ffe4f3;
+      --primary: #ff85c0;
+      --primary-dark: #f06292;
+      --text-main: #5c415d;
+      --text-muted: #9a7b9b;
+      --border-color: #ffb8e0;
+      --canvas-bg: #fff0f8;
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: 'Consolas', 'Courier New', Courier, monospace;
+      font-family: 'Nunito', 'Quicksand', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
 
     body, html {
       width: 100%;
-      height: 100%;
+      height: 100vh;
       background-color: var(--bg-color);
       color: var(--text-main);
       overflow: hidden;
       display: flex;
-      flex-direction: column;
     }
 
-    /* CONTENEDOR PRINCIPAL */
+    /* CONTENEDOR PRINCIPAL - ROW PARA SIDEBAR A LA IZQUIERDA */
     .terminal-container {
       display: flex;
-      flex-direction: column;
-      height: 100%;
+      flex-direction: row;
+      height: 100vh;
       width: 100%;
     }
 
-    /* PANEL SUPERIOR (CONTROLES) */
-    .top-panel {
+    /* PANEL LATERAL (CONTROLES A LA IZQUIERDA) */
+    .side-panel {
       display: flex;
-      flex-wrap: wrap;
-      justify-content: space-around;
-      align-items: flex-start;
+      flex-direction: column;
+      width: 320px;
+      min-width: 320px;
       background: var(--panel-bg);
-      border-bottom: 1px solid var(--border-color);
-      padding: 10px;
-      gap: 15px;
+      border-right: 2px solid var(--border-color);
+      padding: 20px;
+      gap: 20px;
       z-index: 10;
-      max-height: 40vh;
+      height: 100vh;
       overflow-y: auto;
+      box-shadow: 4px 0 15px rgba(255, 133, 192, 0.15);
     }
 
     /* SECCIONES DEL PANEL */
@@ -62,37 +62,39 @@
       display: flex;
       flex-direction: column;
       border: 1px solid var(--border-color);
-      padding: 10px;
-      min-width: 200px;
-      flex: 1 1 200px;
-      background: rgba(0, 255, 0, 0.05);
+      border-radius: 16px;
+      padding: 15px;
+      background: rgba(255, 255, 255, 0.6);
+      box-shadow: inset 0 2px 5px rgba(255,255,255,0.8);
     }
 
     .section-title {
-      font-size: 0.9rem;
-      font-weight: bold;
-      color: var(--text-main);
-      margin-bottom: 10px;
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: var(--primary-dark);
+      margin-bottom: 12px;
       text-align: center;
       text-transform: uppercase;
       letter-spacing: 1px;
-      border-bottom: 1px dashed var(--border-color);
-      padding-bottom: 5px;
+      border-bottom: 2px dotted var(--border-color);
+      padding-bottom: 6px;
     }
 
-    /* CONTROLES TIPO TERMINAL */
+    /* CONTROLES */
     .control-row {
       display: flex;
       flex-direction: column;
-      margin-bottom: 8px;
+      margin-bottom: 15px;
     }
 
     .control-row label {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      margin-bottom: 2px;
+      font-size: 0.8rem;
+      font-weight: bold;
+      color: var(--text-main);
+      margin-bottom: 6px;
     }
 
+    /* BARRAS DE RANGO (SLIDERS) - AHORA SON VISIBLES */
     input[type="range"] {
       -webkit-appearance: none;
       width: 100%;
@@ -100,82 +102,95 @@
     }
     input[type="range"]::-webkit-slider-runnable-track {
       width: 100%;
-      height: 2px;
-      background: var(--border-color);
+      height: 8px; /* Más grueso para ser visible */
+      background: var(--border-color); /* Color pastel visible */
+      border-radius: 10px;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
     }
     input[type="range"]::-webkit-slider-thumb {
       -webkit-appearance: none;
-      height: 12px;
-      width: 6px;
-      background: var(--bg-color);
-      border: 1px solid var(--primary);
-      margin-top: -5px;
+      height: 20px;
+      width: 20px;
+      border-radius: 50%;
+      background: #fff; /* Botón blanco brillante */
+      border: 3px solid var(--primary); /* Borde rosa oscuro */
+      margin-top: -6px;
       cursor: pointer;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
     }
 
     .val-display {
-      font-size: 0.75rem;
-      color: var(--primary);
+      font-size: 0.8rem;
+      font-weight: bold;
+      color: var(--primary-dark);
       text-align: right;
-      margin-top: 2px;
+      margin-top: 4px;
     }
 
-    /* BOTONES */
+    /* BOTONES ESTILO PASTEL */
     .term-btn {
-      background: transparent;
-      border: 1px solid var(--primary);
-      color: var(--primary);
-      padding: 6px 12px;
-      font-size: 0.8rem;
+      background: var(--primary);
+      border: none;
+      border-radius: 20px;
+      color: #fff;
+      padding: 10px 16px;
+      font-size: 0.85rem;
       font-weight: bold;
       cursor: pointer;
       text-transform: uppercase;
-      transition: all 0.1s;
+      transition: all 0.2s ease;
       width: 100%;
       text-align: center;
+      box-shadow: 0 4px 10px rgba(255, 133, 192, 0.3);
     }
     .term-btn:hover {
-      background: var(--primary);
-      color: var(--bg-color);
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 14px rgba(255, 133, 192, 0.4);
     }
     .term-btn:active {
-      transform: scale(0.98);
+      transform: translateY(1px);
+      box-shadow: 0 2px 5px rgba(255, 133, 192, 0.3);
     }
 
     .file-input-wrapper {
-      margin-bottom: 5px;
+      margin-bottom: 10px;
     }
 
-    /* DPAD */
+    /* DPAD REDONDEADO */
     .dpad-container {
       display: grid;
-      grid-template-columns: repeat(3, 40px);
-      grid-template-rows: repeat(3, 40px);
-      gap: 2px;
+      grid-template-columns: repeat(3, 45px);
+      grid-template-rows: repeat(3, 45px);
+      gap: 6px;
       justify-content: center;
       align-items: center;
-      margin-top: 5px;
+      margin-top: 10px;
     }
     .dpad-btn {
       width: 100%;
       height: 100%;
-      background: transparent;
-      border: 1px solid var(--primary);
-      color: var(--primary);
-      font-size: 1.2rem;
+      background: var(--panel-bg);
+      border: 2px solid var(--border-color);
+      border-radius: 12px;
+      color: var(--primary-dark);
+      font-size: 1.4rem;
       display: flex;
       justify-content: center;
       align-items: center;
       cursor: pointer;
       user-select: none;
-      transition: background 0.1s;
+      transition: all 0.1s;
+      box-shadow: 0 2px 5px rgba(255, 133, 192, 0.1);
     }
     .dpad-btn:hover {
-      background: var(--primary-dark);
+      background: var(--border-color);
+      color: #fff;
     }
     .dpad-btn:active {
       background: var(--primary);
-      color: var(--bg-color);
+      color: #fff;
+      transform: scale(0.95);
     }
     .dpad-up { grid-column: 2; grid-row: 1; }
     .dpad-left { grid-column: 1; grid-row: 2; }
@@ -191,37 +206,41 @@
       background: var(--canvas-bg);
       position: relative;
       overflow: hidden;
-      /* Grid sutil */
+      height: 100vh;
+      /* Grid sutil pastel */
       background-image: 
-        linear-gradient(rgba(0, 255, 0, 0.1) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0, 255, 0, 0.1) 1px, transparent 1px);
-      background-size: 20px 20px;
+        linear-gradient(rgba(255, 133, 192, 0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 133, 192, 0.1) 1px, transparent 1px);
+      background-size: 30px 30px;
+      padding: 20px;
     }
 
     canvas {
-      border: 1px solid var(--border-color);
+      border: 4px solid #fff;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(255, 133, 192, 0.2);
       max-width: 100%;
       max-height: 100%;
+      background: #fff;
     }
 
     /* SCROLLBAR */
-    ::-webkit-scrollbar { width: 8px; }
-    ::-webkit-scrollbar-track { background: var(--bg-color); border-left: 1px solid var(--primary-dark); }
-    ::-webkit-scrollbar-thumb { background: var(--primary); }
+    ::-webkit-scrollbar { width: 10px; }
+    ::-webkit-scrollbar-track { background: var(--bg-color); }
+    ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 5px; border: 2px solid var(--bg-color); }
 
     @media (max-width: 768px) {
-      .top-panel {
-        max-height: 50vh;
-        padding: 5px;
-        gap: 5px;
+      .terminal-container {
+        flex-direction: column;
       }
-      .panel-section {
-        min-width: 140px;
-        padding: 5px;
+      .side-panel {
+        width: 100%;
+        height: 45vh;
+        border-right: none;
+        border-bottom: 2px solid var(--border-color);
       }
-      .dpad-container {
-        grid-template-columns: repeat(3, 30px);
-        grid-template-rows: repeat(3, 30px);
+      .canvas-container {
+        height: 55vh;
       }
     }
   </style>
@@ -230,51 +249,51 @@
 
   <div class="terminal-container">
     
-    <!-- PANEL SUPERIOR -->
-    <div class="top-panel">
+    <!-- PANEL LATERAL IZQUIERDO -->
+    <div class="side-panel">
       
       <!-- Carga de Archivos -->
       <div class="panel-section">
-        <div class="section-title">I/O DATOS</div>
+        <div class="section-title">Archivos 🌸</div>
         <div class="file-input-wrapper">
-          <label for="file-input-base" class="term-btn">[ CARGAR BASE ]</label>
+          <label for="file-input-base" class="term-btn">Cargar Base</label>
           <input type="file" id="file-input-base" accept=".txt,.dat,.obj" style="display: none;" />
         </div>
-        <div id="file-name-base" style="font-size:0.6rem; color:var(--text-muted); text-align:center; margin-bottom:10px;">> NULL</div>
+        <div id="file-name-base" style="font-size:0.65rem; font-weight:bold; color:var(--text-muted); text-align:center; margin-bottom:10px;">Ningún archivo</div>
         
         <div class="file-input-wrapper">
-          <label for="file-input-movil" class="term-btn">[ ENSAMBLAR OBJ ]</label>
+          <label for="file-input-movil" class="term-btn">Ensamblar Pieza</label>
           <input type="file" id="file-input-movil" accept=".txt,.dat,.obj" style="display: none;" />
         </div>
-        <div id="file-name-movil" style="font-size:0.6rem; color:var(--text-muted); text-align:center;">> NULL</div>
+        <div id="file-name-movil" style="font-size:0.65rem; font-weight:bold; color:var(--text-muted); text-align:center;">Ningún archivo</div>
       </div>
 
-      <!-- Cámara y Cinemática -->
+      <!-- Cámara -->
       <div class="panel-section">
-         <div class="section-title">SISTEMA VISUAL</div>
+         <div class="section-title">Cámara ✨</div>
          <div class="control-row">
-           <label>Z-INDEX (ZOOM)</label>
+           <label>Distancia (Zoom)</label>
            <input type="range" id="cam-zoom" min="1" max="10" step="0.5" value="3.5">
            <span class="val-display" id="val-cam-zoom">3.5</span>
          </div>
-         <button class="term-btn" id="btn-assemble" style="margin-top: 5px;">[ EXE AUTO-ENSAMBLAR ]</button>
+         <!-- Boton Auto-ensamblar REMOVIDO -->
       </div>
 
       <!-- Iluminacion y Sombras -->
       <div class="panel-section">
-         <div class="section-title">RENDERIZADO</div>
+         <div class="section-title">Iluminación 🎀</div>
          <div class="control-row">
-           <label>VECTOR LUZ X</label>
+           <label>Dirección Luz X</label>
            <input type="range" id="light-dir-x" min="-1" max="1" step="0.1" value="-0.5">
            <span class="val-display" id="val-light-dir-x">-0.5</span>
          </div>
          <div class="control-row">
-           <label>EXPOSICIÓN</label>
+           <label>Exposición</label>
            <input type="range" id="light-bright" min="-2" max="1" step="0.1" value="-1">
            <span class="val-display" id="val-light-bright">-1.0</span>
          </div>
          <div class="control-row">
-           <label>CONSTANTE SOMBRA</label>
+           <label>Sombras</label>
            <input type="range" id="light-shadow" min="0.1" max="5" step="0.1" value="2">
            <span class="val-display" id="val-light-shadow">2.0</span>
          </div>
@@ -282,8 +301,8 @@
 
       <!-- Controles: Animar y Rotación -->
       <div class="panel-section" style="align-items: center;">
-        <div class="section-title" style="width: 100%;">CONTROL GIMBAL</div>
-        <button class="term-btn" id="btn-auto-rotate" style="margin-bottom: 5px; width: 100%;">[ ANIMAR MATRIZ ]</button>
+        <div class="section-title" style="width: 100%;">Rotación 💖</div>
+        <button class="term-btn" id="btn-auto-rotate" style="margin-bottom: 10px; width: 100%;">Animar Rotación</button>
 
         <div class="dpad-container">
           <div class="dpad-btn dpad-up" id="btn-rot-up">&#9650;</div>
@@ -295,7 +314,7 @@
 
     </div>
 
-    <!-- ZONA GRÁFICA (Canvas) -->
+    <!-- ZONA GRÁFICA (Canvas a la derecha) -->
     <main class="canvas-container" id="canvas-container">
       <canvas id="circlechart" width="800" height="600"></canvas>
     </main>
