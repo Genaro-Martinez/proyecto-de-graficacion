@@ -1,7 +1,7 @@
 import { Obj3D } from './Obj3D.js';
 import { CvZbuf } from './CvZbuf.js';
 import { Point3D } from './point3D.js';
-import { clockBase, clockHour, clockMinute, clockSecond } from './clockModels.js';
+import { fanBase, fanRotor } from './fanModels.js';
 
 let canvas: HTMLCanvasElement;
 let graphics: CanvasRenderingContext2D;
@@ -41,31 +41,23 @@ function toggleAutoRotate() {
   
   if (btn) {
     if (autoRotating) {
-      btn.innerHTML = '[ DETENER MATRIZ ]';
+      btn.innerHTML = 'HALT ANIMACION';
       rotateLoop();
     } else {
-      btn.innerHTML = '[ ANIMAR MATRIZ ]';
+      btn.innerHTML = 'EXE ANIMACION';
       cancelAnimationFrame(animationFrameId);
     }
   }
 }
 
-function updateClock() {
-  if (loadedObjects.length < 4) return;
+let fanAngle = 0;
+function updateFan() {
+  if (loadedObjects.length < 2) return;
+  // Obj 0: Base, Obj 1: Rotor
+  fanAngle -= 0.15; // Speed of the fan
+  loadedObjects[1].localRotZ = fanAngle;
   
-  const now = new Date();
-  const ms = now.getMilliseconds();
-  const sec = now.getSeconds() + ms / 1000;
-  const min = now.getMinutes() + sec / 60;
-  const hour = now.getHours() % 12 + min / 60;
-
-  // Obj 1: Hour, Obj 2: Min, Obj 3: Sec
-  // We negate the angle because Math.cos/sin in localRotZ might rotate counter-clockwise by default
-  loadedObjects[1].localRotZ = -hour * (Math.PI * 2 / 12);
-  loadedObjects[2].localRotZ = -min * (Math.PI * 2 / 60);
-  loadedObjects[3].localRotZ = -sec * (Math.PI * 2 / 60);
-  
-  // Re-project with updated localRotZ
+  // Re-project with updated localRot
   vp(0,0,1);
 }
 
@@ -75,7 +67,7 @@ function rotateLoop() {
     vp(dTheta, 0, 1);
   }
   
-  updateClock();
+  updateFan();
   animationFrameId = requestAnimationFrame(rotateLoop);
 }
 
@@ -153,7 +145,6 @@ function setupDPad() {
     btn.addEventListener('mouseup', stopManualRotation);
     btn.addEventListener('mouseleave', stopManualRotation);
     btn.addEventListener('touchstart', (e) => { e.preventDefault(); startManualRotation(dTheta, dPhi, fRho); });
-    btn.addEventListener('touchend', (e) => { e.preventDefault(); stopManualRotation(); });
     btn.addEventListener('touchcancel', (e) => { e.preventDefault(); stopManualRotation(); });
   };
 
@@ -194,6 +185,7 @@ function leerArchivoGenerico(e: any, isBase: boolean) {
              tempObj.rhoMin = baseRho;
              tempObj.rhoMax = 1000 * tempObj.rhoMin;
              tempObj.rho = 3.5 * tempObj.rhoMin;
+             tempObj.baseColorR = 30; tempObj.baseColorG = 30; tempObj.baseColorB = 30;
              
              const lbl = document.getElementById('file-name-base');
              if (lbl) lbl.innerText = "> " + archivo.name;
@@ -204,6 +196,7 @@ function leerArchivoGenerico(e: any, isBase: boolean) {
              tempObj.rhoMin = baseRho;
              tempObj.rhoMax = 1000 * tempObj.rhoMin;
              tempObj.rho = 3.5 * tempObj.rhoMin;
+             tempObj.baseColorR = 213; tempObj.baseColorG = 0; tempObj.baseColorB = 0;
              
              const lbl = document.getElementById('file-name-movil');
              if (lbl) lbl.innerText = "> " + archivo.name;
@@ -219,12 +212,10 @@ function leerArchivoGenerico(e: any, isBase: boolean) {
 window.addEventListener('load', () => {
   cv = new CvZbuf(graphics, canvas);
   
-  const parts = [clockBase, clockHour, clockMinute, clockSecond];
+  const parts = [fanBase, fanRotor];
   const colors = [
-    {r: 255, g: 228, b: 243}, // Base: Soft pastel pink
-    {r: 255, g: 133, b: 192}, // Hour: Vibrant pink
-    {r: 240, g: 98, b: 146},  // Minute: Dark pink
-    {r: 154, g: 123, b: 155}  // Second: Muted purple
+    {r: 30, g: 30, b: 30},    // Base: Dark grey
+    {r: 213, g: 0, b: 0},     // Rotor: Aggressive Red
   ];
 
   let minX = 9999, maxX = -9999;
@@ -250,25 +241,26 @@ window.addEventListener('load', () => {
     }
   });
 
-  let dx = (maxX + minX) / 2.0;
-  let dy = (maxY + minY) / 2.0;
-  let dz = (maxZ + minZ) / 2.0;
-  
   let sx = maxX - minX; let sy = maxY - minY; let sz = maxZ - minZ;
   baseRho = 0.6 * Math.sqrt(sx*sx + sy*sy + sz*sz);
 
   for (let i=0; i<loadedObjects.length; i++) {
      let obj = loadedObjects[i];
-     // Do not shift to global origin so they keep their local coordinate centers (pivots)
      obj.rhoMin = baseRho;
      obj.rhoMax = 1000 * obj.rhoMin;
-     obj.rho = 1.0 * obj.rhoMin; 
+     obj.rho = 2.5 * obj.rhoMin; 
+     obj.sunX = 0.5;
+     
+     // Forzar la matriz absoluta: Vista frontal perfecta
+     obj.theta = 0;
+     obj.phi = 0;
   }
   
-  vp(0,0,1);
+  // Le damos un ligerísimo toque isométrico a la vista frontal
+  vp(-0.2, 0.2, 1.0);
   repaintAll();
   
-  // Set up loop for clock and possible auto-rotation
+  // Set up loop for fan and possible auto-rotation
   rotateLoop();
   
   // Panel Listeners

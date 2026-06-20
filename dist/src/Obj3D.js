@@ -183,7 +183,26 @@ export class Obj3D {
                 let px = P.x;
                 let py = P.y;
                 let pz = P.z;
-                // Apply Local Rotation around Pivot (Z-axis primary for pliers)
+                // Apply Local Rotation around Pivot
+                // X-axis rotation
+                if (this.localRotX !== 0) {
+                    let dy = py - this.pivotY;
+                    let dz = pz - this.pivotZ;
+                    let cosX = Math.cos(this.localRotX);
+                    let sinX = Math.sin(this.localRotX);
+                    py = this.pivotY + dy * cosX - dz * sinX;
+                    pz = this.pivotZ + dy * sinX + dz * cosX;
+                }
+                // Y-axis rotation
+                if (this.localRotY !== 0) {
+                    let dx = px - this.pivotX;
+                    let dz = pz - this.pivotZ;
+                    let cosY = Math.cos(this.localRotY);
+                    let sinY = Math.sin(this.localRotY);
+                    px = this.pivotX + dx * cosY + dz * sinY;
+                    pz = this.pivotZ - dx * sinY + dz * cosY;
+                }
+                // Z-axis rotation
                 if (this.localRotZ !== 0) {
                     let dx = px - this.pivotX;
                     let dy = py - this.pivotY;

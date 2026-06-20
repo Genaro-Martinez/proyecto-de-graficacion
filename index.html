@@ -2,325 +2,462 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Motor 3D - Reloj Pastel</title>
+  <title>Graficación 3D | Dashboard Académico</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <!-- Fuentes modernas -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+  
   <style>
-    /* VARIABLES ESTILO PASTEL (FEMBOY AESTHETIC) */
+    /* VARIABLES GLOBALES */
     :root {
-      --bg-color: #fdf6fb;
-      --panel-bg: #ffe4f3;
-      --primary: #ff85c0;
-      --primary-dark: #f06292;
-      --text-main: #5c415d;
-      --text-muted: #9a7b9b;
-      --border-color: #ffb8e0;
-      --canvas-bg: #fff0f8;
+      --bg-dark: #070b19;
+      --bg-space: #0f172a;
+      --cyan-neon: #06b6d4;
+      --cyan-glow: rgba(6, 182, 212, 0.4);
+      --blue-accent: #3b82f6;
+      --glass-bg: rgba(15, 23, 42, 0.65);
+      --glass-border: rgba(6, 182, 212, 0.25);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: 'Nunito', 'Quicksand', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: 'Inter', sans-serif;
     }
 
     body, html {
       width: 100%;
       height: 100vh;
-      background-color: var(--bg-color);
+      background: radial-gradient(circle at top right, #1e1b4b, var(--bg-dark) 60%);
       color: var(--text-main);
       overflow: hidden;
       display: flex;
     }
 
-    /* CONTENEDOR PRINCIPAL - ROW PARA SIDEBAR A LA IZQUIERDA */
-    .terminal-container {
-      display: flex;
-      flex-direction: row;
-      height: 100vh;
-      width: 100%;
+    /* EFECTO GRID DE FONDO */
+    body::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-image: 
+        linear-gradient(var(--glass-border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--glass-border) 1px, transparent 1px);
+      background-size: 50px 50px;
+      opacity: 0.15;
+      z-index: -1;
     }
 
-    /* PANEL LATERAL (CONTROLES A LA IZQUIERDA) */
-    .side-panel {
+    /* ======= SIDEBAR ======= */
+    .sidebar {
+      width: 80px;
+      height: 100vh;
+      background: rgba(7, 11, 25, 0.8);
+      backdrop-filter: blur(15px);
+      border-right: 1px solid var(--glass-border);
       display: flex;
       flex-direction: column;
-      width: 320px;
-      min-width: 320px;
-      background: var(--panel-bg);
-      border-right: 2px solid var(--border-color);
+      align-items: center;
+      padding: 20px 0;
+      z-index: 50;
+      box-shadow: 5px 0 20px rgba(0,0,0,0.5);
+    }
+    .logo-container {
+      width: 50px; height: 50px;
+      background: linear-gradient(135deg, var(--cyan-neon), var(--blue-accent));
+      border-radius: 12px;
+      display: flex; justify-content: center; align-items: center;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: bold; font-size: 1.5rem;
+      margin-bottom: 40px;
+      box-shadow: 0 0 15px var(--cyan-glow);
+    }
+    .nav-icon {
+      width: 50px; height: 50px;
+      margin-bottom: 20px;
+      border-radius: 12px;
+      display: flex; justify-content: center; align-items: center;
+      cursor: pointer;
+      color: var(--text-muted);
+      font-size: 1.2rem;
+      transition: all 0.3s ease;
+    }
+    .nav-icon.active, .nav-icon:hover {
+      background: rgba(6, 182, 212, 0.1);
+      color: var(--cyan-neon);
+      border-left: 3px solid var(--cyan-neon);
+    }
+
+    /* ======= MAIN LAYOUT ======= */
+    .main-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
       padding: 20px;
       gap: 20px;
-      z-index: 10;
-      height: 100vh;
-      overflow-y: auto;
-      box-shadow: 4px 0 15px rgba(255, 133, 192, 0.15);
     }
 
-    /* SECCIONES DEL PANEL */
-    .panel-section {
+    /* HEADER */
+    .top-header {
       display: flex;
-      flex-direction: column;
-      border: 1px solid var(--border-color);
+      justify-content: space-between;
+      align-items: center;
+      height: 60px;
+      background: var(--glass-bg);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--glass-border);
       border-radius: 16px;
-      padding: 15px;
-      background: rgba(255, 255, 255, 0.6);
-      box-shadow: inset 0 2px 5px rgba(255,255,255,0.8);
+      padding: 0 25px;
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
     }
-
-    .section-title {
-      font-size: 0.95rem;
-      font-weight: 800;
-      color: var(--primary-dark);
-      margin-bottom: 12px;
-      text-align: center;
-      text-transform: uppercase;
+    .header-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.2rem;
+      color: var(--cyan-neon);
       letter-spacing: 1px;
-      border-bottom: 2px dotted var(--border-color);
-      padding-bottom: 6px;
+    }
+    .progress-container {
+      display: flex; align-items: center; gap: 15px;
+    }
+    .progress-text { font-size: 0.85rem; color: var(--text-muted); }
+    .progress-bar-bg {
+      width: 200px; height: 8px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      width: 85%; height: 100%;
+      background: linear-gradient(90deg, var(--blue-accent), var(--cyan-neon));
+      box-shadow: 0 0 10px var(--cyan-glow);
+    }
+    .user-profile {
+      display: flex; align-items: center; gap: 10px;
+    }
+    .avatar {
+      width: 35px; height: 35px;
+      border-radius: 50%;
+      background: var(--text-muted);
+      border: 2px solid var(--cyan-neon);
     }
 
-    /* CONTROLES */
-    .control-row {
+    /* DASHBOARD GRID */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 3fr 1fr;
+      grid-template-rows: 2fr 1fr;
+      gap: 20px;
+      height: calc(100vh - 120px);
+    }
+
+    /* GLASS CARDS */
+    .glass-card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
       display: flex;
       flex-direction: column;
-      margin-bottom: 15px;
+      overflow: hidden;
+      position: relative;
     }
-
-    .control-row label {
-      font-size: 0.8rem;
-      font-weight: bold;
+    .card-header {
+      padding: 15px 20px;
+      border-bottom: 1px solid var(--glass-border);
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.9rem;
       color: var(--text-main);
-      margin-bottom: 6px;
+      display: flex; justify-content: space-between; align-items: center;
+      background: rgba(0,0,0,0.2);
     }
 
-    /* BARRAS DE RANGO (SLIDERS) - AHORA SON VISIBLES */
-    input[type="range"] {
-      -webkit-appearance: none;
-      width: 100%;
-      background: transparent;
+    /* 3D VIEWER CONTAINER (Centro) */
+    .viewer-area {
+      grid-column: 1 / 2;
+      grid-row: 1 / 2;
     }
-    input[type="range"]::-webkit-slider-runnable-track {
-      width: 100%;
-      height: 8px; /* Más grueso para ser visible */
-      background: var(--border-color); /* Color pastel visible */
-      border-radius: 10px;
-      box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
-    }
-    input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      height: 20px;
-      width: 20px;
-      border-radius: 50%;
-      background: #fff; /* Botón blanco brillante */
-      border: 3px solid var(--primary); /* Borde rosa oscuro */
-      margin-top: -6px;
-      cursor: pointer;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    }
-
-    .val-display {
-      font-size: 0.8rem;
-      font-weight: bold;
-      color: var(--primary-dark);
-      text-align: right;
-      margin-top: 4px;
-    }
-
-    /* BOTONES ESTILO PASTEL */
-    .term-btn {
-      background: var(--primary);
-      border: none;
-      border-radius: 20px;
-      color: #fff;
-      padding: 10px 16px;
-      font-size: 0.85rem;
-      font-weight: bold;
-      cursor: pointer;
-      text-transform: uppercase;
-      transition: all 0.2s ease;
-      width: 100%;
-      text-align: center;
-      box-shadow: 0 4px 10px rgba(255, 133, 192, 0.3);
-    }
-    .term-btn:hover {
-      background: var(--primary-dark);
-      transform: translateY(-2px);
-      box-shadow: 0 6px 14px rgba(255, 133, 192, 0.4);
-    }
-    .term-btn:active {
-      transform: translateY(1px);
-      box-shadow: 0 2px 5px rgba(255, 133, 192, 0.3);
-    }
-
-    .file-input-wrapper {
-      margin-bottom: 10px;
-    }
-
-    /* DPAD REDONDEADO */
-    .dpad-container {
-      display: grid;
-      grid-template-columns: repeat(3, 45px);
-      grid-template-rows: repeat(3, 45px);
-      gap: 6px;
-      justify-content: center;
-      align-items: center;
-      margin-top: 10px;
-    }
-    .dpad-btn {
-      width: 100%;
-      height: 100%;
-      background: var(--panel-bg);
-      border: 2px solid var(--border-color);
-      border-radius: 12px;
-      color: var(--primary-dark);
-      font-size: 1.4rem;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      cursor: pointer;
-      user-select: none;
-      transition: all 0.1s;
-      box-shadow: 0 2px 5px rgba(255, 133, 192, 0.1);
-    }
-    .dpad-btn:hover {
-      background: var(--border-color);
-      color: #fff;
-    }
-    .dpad-btn:active {
-      background: var(--primary);
-      color: #fff;
-      transform: scale(0.95);
-    }
-    .dpad-up { grid-column: 2; grid-row: 1; }
-    .dpad-left { grid-column: 1; grid-row: 2; }
-    .dpad-right { grid-column: 3; grid-row: 2; }
-    .dpad-down { grid-column: 2; grid-row: 3; }
-
-    /* CANVAS CONTENEDOR */
     .canvas-container {
       flex: 1;
       display: flex;
       justify-content: center;
       align-items: center;
-      background: var(--canvas-bg);
       position: relative;
-      overflow: hidden;
-      height: 100vh;
-      /* Grid sutil pastel */
-      background-image: 
-        linear-gradient(rgba(255, 133, 192, 0.1) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 133, 192, 0.1) 1px, transparent 1px);
-      background-size: 30px 30px;
-      padding: 20px;
+      background: radial-gradient(circle at center, #111827, #030712);
+    }
+    canvas {
+      width: 100%; height: 100%;
+      object-fit: contain;
+      cursor: crosshair;
+    }
+    .render-overlay {
+      position: absolute;
+      bottom: 15px; right: 15px;
+      background: rgba(0,0,0,0.6);
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--glass-border);
+      font-size: 0.75rem;
+      font-family: 'Orbitron', monospace;
+      color: var(--cyan-neon);
     }
 
-    canvas {
-      border: 4px solid #fff;
-      border-radius: 20px;
-      box-shadow: 0 10px 30px rgba(255, 133, 192, 0.2);
-      max-width: 100%;
-      max-height: 100%;
-      background: #fff;
+    /* TOOLS PANEL (Derecha) */
+    .tools-area {
+      grid-column: 2 / 3;
+      grid-row: 1 / 3;
+      overflow-y: auto;
     }
+    .tool-group {
+      padding: 15px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .tool-label {
+      font-size: 0.8rem; color: var(--text-muted);
+      margin-bottom: 8px; display: block;
+    }
+
+    /* SLIDERS MODERNOS */
+    .slider-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    input[type="range"] {
+      -webkit-appearance: none;
+      flex: 1; background: transparent;
+    }
+    input[type="range"]::-webkit-slider-runnable-track {
+      height: 4px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 2px;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      height: 14px; width: 14px;
+      background: var(--cyan-neon);
+      border-radius: 50%;
+      margin-top: -5px;
+      cursor: pointer;
+      box-shadow: 0 0 10px var(--cyan-glow);
+    }
+    .val-display { font-family: monospace; font-size: 0.85rem; color: var(--cyan-neon); min-width: 35px; text-align: right;}
+
+    /* BOTONES MODERNOS */
+    .btn-cyber {
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid var(--cyan-neon);
+      color: var(--cyan-neon);
+      padding: 10px 15px;
+      border-radius: 8px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.8rem;
+      cursor: pointer;
+      width: 100%;
+      text-align: center;
+      transition: all 0.2s;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .btn-cyber:hover {
+      background: var(--cyan-neon);
+      color: #000;
+      box-shadow: 0 0 15px var(--cyan-glow);
+    }
+
+    /* DPAD REDISEÑADO */
+    .dpad-container {
+      display: grid;
+      grid-template-columns: repeat(3, 40px);
+      grid-template-rows: repeat(3, 40px);
+      gap: 5px;
+      justify-content: center;
+      margin-top: 15px;
+    }
+    .dpad-btn {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 6px;
+      display: flex; justify-content: center; align-items: center;
+      color: var(--text-main); font-size: 0.8rem; cursor: pointer;
+      transition: 0.2s;
+    }
+    .dpad-btn:hover { background: var(--cyan-neon); color: #000; }
+    .dpad-up { grid-column: 2; grid-row: 1; }
+    .dpad-left { grid-column: 1; grid-row: 2; }
+    .dpad-right { grid-column: 3; grid-row: 2; }
+    .dpad-down { grid-column: 2; grid-row: 3; }
+
+    /* ESTADISTICAS Y GALERIA (Abajo) */
+    .bottom-area {
+      grid-column: 1 / 2;
+      grid-row: 2 / 3;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    
+    .stats-card { padding: 20px; display: flex; flex-direction: column; justify-content: center; }
+    .stat-row { display: flex; justify-content: space-between; margin-bottom: 15px; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 5px;}
+    .stat-value { font-family: 'Orbitron', sans-serif; color: var(--cyan-neon); font-size: 1.2rem; }
+
+    .gallery-card { padding: 15px; }
+    .gallery-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; height: 100%; }
+    .gallery-item {
+      background: rgba(0,0,0,0.4);
+      border: 1px solid var(--glass-border);
+      border-radius: 8px;
+      position: relative; overflow: hidden;
+    }
+    .gallery-item::after {
+      content: 'Render';
+      position: absolute; bottom: 5px; left: 5px;
+      font-size: 0.6rem; color: var(--text-muted);
+    }
+    .gallery-item:nth-child(1) { background: linear-gradient(45deg, #111, #222); }
+    .gallery-item:nth-child(2) { background: linear-gradient(45deg, #0a192f, #112240); }
+    .gallery-item:nth-child(3) { background: linear-gradient(45deg, #1e1b4b, #312e81); }
 
     /* SCROLLBAR */
-    ::-webkit-scrollbar { width: 10px; }
-    ::-webkit-scrollbar-track { background: var(--bg-color); }
-    ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 5px; border: 2px solid var(--bg-color); }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--cyan-glow); border-radius: 3px; }
 
-    @media (max-width: 768px) {
-      .terminal-container {
-        flex-direction: column;
-      }
-      .side-panel {
-        width: 100%;
-        height: 45vh;
-        border-right: none;
-        border-bottom: 2px solid var(--border-color);
-      }
-      .canvas-container {
-        height: 55vh;
-      }
-    }
   </style>
 </head>
 <body>
 
-  <div class="terminal-container">
+  <!-- SIDEBAR NAVEGACION -->
+  <nav class="sidebar">
+    <div class="logo-container">3D</div>
+    <div class="nav-icon active" title="Dashboard">◱</div>
+    <div class="nav-icon" title="Modelado">⚙</div>
+    <div class="nav-icon" title="Materiales">▤</div>
+    <div class="nav-icon" title="Animación">▶</div>
+  </nav>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <div class="main-wrapper">
     
-    <!-- PANEL LATERAL IZQUIERDO -->
-    <div class="side-panel">
+    <!-- HEADER -->
+    <header class="top-header">
+      <div class="header-title">PROYECTO FINAL // GRAFICACIÓN 2026</div>
+      <div class="user-profile">
+        <span class="progress-text" style="color: var(--cyan-neon); font-weight: bold; text-transform: uppercase;">GENARO MARTINEZ</span>
+        <div class="avatar"></div>
+      </div>
+    </header>
+
+    <!-- DASHBOARD GRID -->
+    <div class="dashboard-grid">
       
-      <!-- Carga de Archivos -->
-      <div class="panel-section">
-        <div class="section-title">Archivos 🌸</div>
-        <div class="file-input-wrapper">
-          <label for="file-input-base" class="term-btn">Cargar Base</label>
-          <input type="file" id="file-input-base" accept=".txt,.dat,.obj" style="display: none;" />
+      <!-- VIEWER 3D -->
+      <div class="glass-card viewer-area">
+        <div class="card-header">
+          <span>ESPACIO DE TRABAJO 3D</span>
+          <span style="color: var(--cyan-neon); font-size: 0.75rem;">MOTOR: CanvasZBuf v2.0</span>
         </div>
-        <div id="file-name-base" style="font-size:0.65rem; font-weight:bold; color:var(--text-muted); text-align:center; margin-bottom:10px;">Ningún archivo</div>
+        <div class="canvas-container" id="canvas-container">
+          <canvas id="circlechart" width="1000" height="600"></canvas>
+          <div class="render-overlay">FPS: 60 | RENDER: ACTIVO</div>
+        </div>
+      </div>
+
+      <!-- PANEL DE HERRAMIENTAS -->
+      <div class="glass-card tools-area">
+        <div class="card-header">PROPIEDADES</div>
         
-        <div class="file-input-wrapper">
-          <label for="file-input-movil" class="term-btn">Ensamblar Pieza</label>
+        <!-- Archivos -->
+        <div class="tool-group">
+          <span class="tool-label">IMPORTAR MALLAS (.txt)</span>
+          <label for="file-input-base" class="btn-cyber" style="display:block;">CARGAR ESTATOR</label>
+          <input type="file" id="file-input-base" accept=".txt,.dat,.obj" style="display: none;" />
+          <div id="file-name-base" style="font-size:0.65rem; color:var(--text-muted); margin-bottom:10px; text-align:center;">Ningún archivo seleccionado</div>
+          
+          <label for="file-input-movil" class="btn-cyber" style="display:block;">CARGAR ROTOR</label>
           <input type="file" id="file-input-movil" accept=".txt,.dat,.obj" style="display: none;" />
+          <div id="file-name-movil" style="font-size:0.65rem; color:var(--text-muted); text-align:center;">Ningún archivo seleccionado</div>
         </div>
-        <div id="file-name-movil" style="font-size:0.65rem; font-weight:bold; color:var(--text-muted); text-align:center;">Ningún archivo</div>
+
+        <!-- Cámara -->
+        <div class="tool-group">
+          <span class="tool-label">ÓPTICA Y CÁMARA</span>
+          <div class="slider-row">
+            <label style="font-size: 0.75rem; width: 40px;">Zoom</label>
+            <input type="range" id="cam-zoom" min="1" max="10" step="0.5" value="2.5">
+            <span class="val-display" id="val-cam-zoom">2.5</span>
+          </div>
+        </div>
+
+        <!-- Renderizado -->
+        <div class="tool-group">
+          <span class="tool-label">ILUMINACIÓN GLOBAL</span>
+          <div class="slider-row">
+            <label style="font-size: 0.75rem; width: 40px;">VectorX</label>
+            <input type="range" id="light-dir-x" min="-1" max="1" step="0.1" value="0.5">
+            <span class="val-display" id="val-light-dir-x">0.5</span>
+          </div>
+          <div class="slider-row">
+            <label style="font-size: 0.75rem; width: 40px;">Expos.</label>
+            <input type="range" id="light-bright" min="-2" max="1" step="0.1" value="-1">
+            <span class="val-display" id="val-light-bright">-1.0</span>
+          </div>
+          <div class="slider-row">
+            <label style="font-size: 0.75rem; width: 40px;">Sombras</label>
+            <input type="range" id="light-shadow" min="0.1" max="5" step="0.1" value="2">
+            <span class="val-display" id="val-light-shadow">2.0</span>
+          </div>
+        </div>
+
+        <!-- Animación -->
+        <div class="tool-group" style="border-bottom: none;">
+          <span class="tool-label">CINEMÁTICA Y ROTACIÓN</span>
+          <button class="btn-cyber" id="btn-auto-rotate">HALT ANIMACIÓN</button>
+          
+          <div class="dpad-container">
+            <div class="dpad-btn dpad-up" id="btn-rot-up">▲</div>
+            <div class="dpad-btn dpad-left" id="btn-rot-left">◀</div>
+            <div class="dpad-btn dpad-right" id="btn-rot-right">▶</div>
+            <div class="dpad-btn dpad-down" id="btn-rot-down">▼</div>
+          </div>
+        </div>
+
       </div>
 
-      <!-- Cámara -->
-      <div class="panel-section">
-         <div class="section-title">Cámara ✨</div>
-         <div class="control-row">
-           <label>Distancia (Zoom)</label>
-           <input type="range" id="cam-zoom" min="1" max="10" step="0.5" value="3.5">
-           <span class="val-display" id="val-cam-zoom">3.5</span>
-         </div>
-         <!-- Boton Auto-ensamblar REMOVIDO -->
-      </div>
+      <!-- ESTADÍSTICAS -->
+      <div class="glass-card bottom-area">
+        <div class="stats-card">
+          <div class="card-header" style="background:transparent; padding:0 0 15px 0;">MÉTRICAS DEL ESCENARIO</div>
+          <div class="stat-row">
+            <span class="tool-label" style="margin:0;">Vértices Totales</span>
+            <span class="stat-value">1,248</span>
+          </div>
+          <div class="stat-row">
+            <span class="tool-label" style="margin:0;">Polígonos (Caras)</span>
+            <span class="stat-value">856</span>
+          </div>
+          <div class="stat-row" style="border:none;">
+            <span class="tool-label" style="margin:0;">Algoritmo Ocultamiento</span>
+            <span class="stat-value" style="font-size: 0.9rem;">Z-Buffer</span>
+          </div>
+        </div>
 
-      <!-- Iluminacion y Sombras -->
-      <div class="panel-section">
-         <div class="section-title">Iluminación 🎀</div>
-         <div class="control-row">
-           <label>Dirección Luz X</label>
-           <input type="range" id="light-dir-x" min="-1" max="1" step="0.1" value="-0.5">
-           <span class="val-display" id="val-light-dir-x">-0.5</span>
-         </div>
-         <div class="control-row">
-           <label>Exposición</label>
-           <input type="range" id="light-bright" min="-2" max="1" step="0.1" value="-1">
-           <span class="val-display" id="val-light-bright">-1.0</span>
-         </div>
-         <div class="control-row">
-           <label>Sombras</label>
-           <input type="range" id="light-shadow" min="0.1" max="5" step="0.1" value="2">
-           <span class="val-display" id="val-light-shadow">2.0</span>
-         </div>
-      </div>
-
-      <!-- Controles: Animar y Rotación -->
-      <div class="panel-section" style="align-items: center;">
-        <div class="section-title" style="width: 100%;">Rotación 💖</div>
-        <button class="term-btn" id="btn-auto-rotate" style="margin-bottom: 10px; width: 100%;">Animar Rotación</button>
-
-        <div class="dpad-container">
-          <div class="dpad-btn dpad-up" id="btn-rot-up">&#9650;</div>
-          <div class="dpad-btn dpad-left" id="btn-rot-left">&#9664;</div>
-          <div class="dpad-btn dpad-right" id="btn-rot-right">&#9654;</div>
-          <div class="dpad-btn dpad-down" id="btn-rot-down">&#9660;</div>
+        <!-- GALERÍA DE RENDERS -->
+        <div class="gallery-card">
+          <div class="card-header" style="background:transparent; padding:0 0 10px 0;">HISTORIAL DE RENDERS</div>
+          <div class="gallery-grid">
+            <div class="gallery-item"></div>
+            <div class="gallery-item"></div>
+            <div class="gallery-item"></div>
+          </div>
         </div>
       </div>
 
     </div>
-
-    <!-- ZONA GRÁFICA (Canvas a la derecha) -->
-    <main class="canvas-container" id="canvas-container">
-      <canvas id="circlechart" width="800" height="600"></canvas>
-    </main>
-
   </div>
 
-  <script src="dist/src/index.js" type="module"></script>
+  <script src="dist/src/index.js?v=10" type="module"></script>
 </body>
 </html>
