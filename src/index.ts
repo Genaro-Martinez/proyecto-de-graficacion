@@ -186,7 +186,8 @@ function leerArchivoGenerico(e: any, isBase: boolean) {
              tempObj.rhoMax = 1000 * tempObj.rhoMin;
              tempObj.rho = 3.5 * tempObj.rhoMin;
              tempObj.baseColorR = 30; tempObj.baseColorG = 30; tempObj.baseColorB = 30;
-             tempObj.targetX = -1.0;
+             tempObj.targetX = 0;
+             tempObj.pivotX = -1.0;
              
              const lbl = document.getElementById('file-name-base');
              if (lbl) lbl.innerText = "> " + archivo.name;
@@ -198,7 +199,8 @@ function leerArchivoGenerico(e: any, isBase: boolean) {
              tempObj.rhoMax = 1000 * tempObj.rhoMin;
              tempObj.rho = 3.5 * tempObj.rhoMin;
              tempObj.baseColorR = 213; tempObj.baseColorG = 0; tempObj.baseColorB = 0;
-             tempObj.targetX = -1.0;
+             tempObj.targetX = 0;
+             tempObj.pivotX = -1.0;
              
              const lbl = document.getElementById('file-name-movil');
              if (lbl) lbl.innerText = "> " + archivo.name;
@@ -252,8 +254,13 @@ window.addEventListener('load', () => {
      obj.rhoMax = 1000 * obj.rhoMin;
      obj.rho = 2.5 * obj.rhoMin; 
      obj.sunX = 0.5;
-     // Centrar la figura desplazándola en X. Si 1.0 la bajó, -1.0 la sube.
-     obj.targetX = -1.0;
+     // El modelo ya fue trasladado geométricamente en Python, 
+     // así que su centro absoluto es X=0. No necesitamos targetX.
+     obj.targetX = 0;
+     
+     // Para que el rotor siga girando sobre su propio eje (ahora movido a X=-1.0),
+     // le indicamos al motor 3D dónde está el pivote.
+     obj.pivotX = -1.0;
      
      // Forzar la matriz absoluta: Vista frontal perfecta
      obj.theta = 0;

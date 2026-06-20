@@ -65,6 +65,9 @@ def generate_cylinder(radius, height, sides, offset_val, axis='z'):
         
     return vertices, faces
 
+def translate_vertices(vertices, dx, dy, dz):
+    return [(x+dx, y+dy, z+dz) for x, y, z in vertices]
+
 def generate_fan_base():
     # Asumiendo theta=0, phi=0 en la proyección:
     # Eje X va hacia ABAJO (Pantalla)
@@ -76,10 +79,11 @@ def generate_fan_base():
     # Poste en X, desde X=0 hasta X=2.0, en Z=0
     p_v, p_f = generate_cylinder(radius=0.15, height=2.0, sides=12, offset_val=0.0, axis='x')
     # Motor en Z, cruzando el poste. Desde Z=-0.4 (frente) a Z=0.8 (atrás)
-    # (El offset de 'z' empieza en offset_val y va hasta offset_val + height)
     m_v, m_f = generate_cylinder(radius=0.4, height=1.2, sides=16, offset_val=-0.4, axis='z')
     
-    return combine_meshes((b_v, b_f), (p_v, p_f), (m_v, m_f))
+    v, f = combine_meshes((b_v, b_f), (p_v, p_f), (m_v, m_f))
+    # Trasladar todo hacia arriba por 1.0 para que el centro de gravedad del ensamble sea 0,0,0
+    return translate_vertices(v, -1.0, 0.0, 0.0), f
 
 def generate_blade():
     # Aspas al frente del motor (Z = -0.5)
@@ -129,7 +133,9 @@ def generate_rotor():
         rot_v = rotate_z(blade_v, angle)
         meshes.append((rot_v, blade_f))
         
-    return combine_meshes(*meshes)
+    v, f = combine_meshes(*meshes)
+    # Trasladar el rotor la misma cantidad para que coincida con el estator
+    return translate_vertices(v, -1.0, 0.0, 0.0), f
 
 base_v, base_f = generate_fan_base()
 rotor_v, rotor_f = generate_rotor()
