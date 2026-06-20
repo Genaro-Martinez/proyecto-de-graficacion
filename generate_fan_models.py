@@ -72,34 +72,35 @@ def generate_fan_base():
     # Asumiendo theta=0, phi=0 en la proyección:
     # Eje X va hacia ABAJO (Pantalla)
     # Eje Y va hacia DERECHA (Pantalla)
-    # Eje Z va hacia el FONDO (Profundidad)
+    # Eje Z POSITIVO va hacia la CÁMARA (Frente)
 
     # Piso en X = 2.0 (disco apuntando en X)
     b_v, b_f = generate_cylinder(radius=1.5, height=0.2, sides=24, offset_val=2.0, axis='x')
     # Poste en X, desde X=0 hasta X=2.0, en Z=0
     p_v, p_f = generate_cylinder(radius=0.15, height=2.0, sides=12, offset_val=0.0, axis='x')
-    # Motor en Z, cruzando el poste. Desde Z=-0.4 (frente) a Z=0.8 (atrás)
-    m_v, m_f = generate_cylinder(radius=0.4, height=1.2, sides=16, offset_val=-0.4, axis='z')
+    # Motor en Z. El Z positivo está hacia la cámara. 
+    # Así que va desde Z=-0.8 (atrás del poste) hasta Z=0.4 (frente al poste).
+    m_v, m_f = generate_cylinder(radius=0.4, height=1.2, sides=16, offset_val=-0.8, axis='z')
     
     v, f = combine_meshes((b_v, b_f), (p_v, p_f), (m_v, m_f))
     # Trasladar todo hacia arriba por 1.0 para que el centro de gravedad del ensamble sea 0,0,0
     return translate_vertices(v, -1.0, 0.0, 0.0), f
 
 def generate_blade():
-    # Aspas al frente del motor (Z = -0.5)
+    # Aspas al frente del motor (Z = +0.5)
     vertices = [
-        # Back surface (Z = -0.55)
-        (0.2, -0.1, -0.55),    # 1
-        (1.8, -0.3, -0.65),    # 2
-        (2.0, 0, -0.55),       # 3
-        (1.5, 0.4, -0.55),     # 4
-        (0.2, 0.1, -0.55),     # 5
-        # Front surface (Z = -0.45)
-        (0.2, -0.1, -0.45),    # 6
-        (1.8, -0.3, -0.55),    # 7
-        (2.0, 0, -0.45),       # 8
-        (1.5, 0.4, -0.45),     # 9
-        (0.2, 0.1, -0.45),     # 10
+        # Back surface (Z = 0.45, un poco más lejos de la cámara)
+        (0.2, -0.1, 0.45),    # 1
+        (1.8, -0.3, 0.35),    # 2
+        (2.0, 0, 0.45),       # 3
+        (1.5, 0.4, 0.45),     # 4
+        (0.2, 0.1, 0.45),     # 5
+        # Front surface (Z = 0.55, un poco más cerca de la cámara)
+        (0.2, -0.1, 0.55),    # 6
+        (1.8, -0.3, 0.45),    # 7
+        (2.0, 0, 0.55),       # 8
+        (1.5, 0.4, 0.55),     # 9
+        (0.2, 0.1, 0.55),     # 10
     ]
     faces = [
         [1, 5, 4, 3, 2], # Back
@@ -122,8 +123,8 @@ def rotate_z(vertices, angle):
 
 def generate_rotor():
     num_blades = 3
-    # Hub en el eje Z (apuntando a la cámara, desde Z=-0.6 a Z=-0.4)
-    hub_v, hub_f = generate_cylinder(radius=0.3, height=0.2, sides=12, offset_val=-0.6, axis='z')
+    # Hub en el eje Z (frente al motor, desde Z=0.4 a Z=0.6)
+    hub_v, hub_f = generate_cylinder(radius=0.3, height=0.2, sides=12, offset_val=0.4, axis='z')
     
     blade_v, blade_f = generate_blade()
     
