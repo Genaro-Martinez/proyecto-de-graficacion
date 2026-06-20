@@ -259,8 +259,8 @@ canvas.addEventListener('wheel', (e) => {
 window.addEventListener('load', () => {
   cv = new CvZbuf(graphics, canvas);
   Promise.all([
-    fetch('pinza_base.txt').then(r => r.ok ? r.text() : ""),
-    fetch('pinza_movil.txt').then(r => r.ok ? r.text() : "")
+    fetch('./pinza_base.txt?v=' + Date.now()).then(r => r.ok ? r.text() : ""),
+    fetch('./pinza_movil.txt?v=' + Date.now()).then(r => r.ok ? r.text() : "")
   ]).then(([baseData, movilData]) => {
     
     if (baseData) {
